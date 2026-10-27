@@ -29,8 +29,8 @@ void extract_external_commands(char external_commands[][30]){
         }   
     }   
 }
-int check_command_type(char *command,char *internal_commands,char *external_commands){
-    
+int check_command_type(char *command, char internal_commands[][10],char external_commands[][30])
+{
     int i;
     for (i = 0; i < 29; i++){
         if (strcmp(internal_commands[i], command) == 0){
@@ -43,10 +43,28 @@ int check_command_type(char *command,char *internal_commands,char *external_comm
             return EXTERNAL;
         }
     }
-
     return NO_COMMAND;
 }
- void execute_internal_commands(char *input_string){
+
+void execute_internal_commands(char *input_string){
+    if(strncmp(input_string, "cd", 2) == 0){
+        chdir(&input_string[3]);
+    }
+    else if(strncmp(input_string, "exit", 4) == 0){
+        exit(0);
+    }
+    else if(strncmp(input_string, "echo", 4) == 0){
+        echo(input_string, 0);
+    } 
+    else if(strncmp(input_string, "pwd", 3) == 0){
+        char cwd[1024];
+        if (getcwd(cwd, sizeof(cwd)) != NULL) {
+            printf("%s\n", cwd);
+        } 
+        else {
+            perror("getcwd() error");
+        }
+    }
 
 }
 
