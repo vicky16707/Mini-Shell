@@ -48,6 +48,16 @@ int main()
             }
             else if(ret==EXTERNAL){
                 printf("External command\n");
+                pid_t pid = fork();
+                if (pid == 0) {
+                    // Child process
+                    char *args[] = {commands[0], NULL}; // Prepare arguments for execvp
+                    execvp(commands[0], args); // Execute the external command
+                    perror("execvp failed"); // If execvp returns, it means it failed
+                    exit(EXIT_FAILURE); // Exit child process with failure
+                } else if (pid > 0) {
+                    // Parent process
+                    waitpid(pid,NULL, 0); // Wait for the child process to finish     
             }
             else{
                 printf("No Command \n");
