@@ -54,7 +54,18 @@ void execute_internal_commands(char *input_string){
         exit(0);
     }
     else if(strncmp(input_string, "echo", 4) == 0){
-        echo(input_string, 0);
+        if(strncmp(input_string, "echo $SHELL", 11) == 0){
+            printf("%s\n", getenv("SHELL"));
+        }
+        else if(strncmp(input_string, "echo $$", 7) == 0){
+            printf("%d\n", getpid());
+        }
+        else if(strncmp(input_string, "echo $?", 7) == 0){
+            printf("%d\n", WEXITSTATUS(status));
+        }
+        else {
+            printf("%s\n", input_string + 5);
+        }
     } 
     else if(strncmp(input_string, "pwd", 3) == 0){
         char cwd[1024];

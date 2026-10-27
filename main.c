@@ -1,20 +1,18 @@
 
 #include "head.h"
-
+int status = 0;
+pid_t pid;
 int main()
 {
     system("clear");
 
     char external_commands[160][30] = {0};
-    char internal_commands[29][10] = {0};
+    char internal_commands[8][10] = {0};
 
     extract_external_commands(external_commands);
 
     char *builtins[] = {
-        "echo", "printf", "read", "cd", "pwd", "pushd", "popd",
-        "dirs", "let", "eval", "set", "unset", "export", "declare",
-        "typeset", "readonly", "getopts", "source", "exit", "exec",
-        "shopt", "caller", "true", "type", "hash", "bind", "help", NULL
+        "echo", "cd", "pwd", "exit","fg","bg", NULL
     };
 
     int i = 0;
@@ -68,7 +66,7 @@ int main()
             }
             else if (ret == EXTERNAL){
                 printf("External command\n");
-                pid_t pid = fork();
+                pid = fork();
 
                 if (pid == 0){
                     char *args[] = {commands[0], NULL};
