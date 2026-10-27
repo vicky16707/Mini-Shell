@@ -38,13 +38,16 @@ int main()
 
                 if (input_string[i] == ' '){
                     printf("Invalid prompt string");
+                    continue;
                 }
             }
 
-            strcpy(prompt, &input_string[j]);
+            strcpy(prompt, input_string + 4);
+            continue;
         }
         else{
-            char commands[10][20] = {0};
+            char *commands[11];
+
             char *token = strtok(input_string, " ");
             int j = 0;
 
@@ -53,9 +56,20 @@ int main()
                 j++;
                 token = strtok(NULL, " ");
             }
+            commands[j] = NULL;
 
             if (j == 0){//agin goes to the start of the loop if no command is entered
                 continue;
+            }
+            int pipe_present = 0;
+
+            for (int i = 0; commands[i] != NULL; i++)
+            {
+                if (strcmp(commands[i], "|") == 0)
+                {
+                    pipe_present = 1;
+                    break;
+                }
             }
 
             int ret = check_command_type(commands[0],internal_commands,external_commands);
@@ -66,19 +80,24 @@ int main()
 
             }
             else if (ret == EXTERNAL){
-                pid = fork();
-
-                if (pid == 0){
-                    char *args[] = {commands[0], NULL};
-                    execvp(commands[0], args);
-                    perror("execvp");
-                    exit(EXIT_FAILURE);
-                }
-                else if (pid > 0){
-                    waitpid(pid, NULL, 0);
+                if(pipe_present){
+                    // Handle piped command==
                 }
                 else{
-                    perror("fork");
+                    pid = fork();
+
+                    if (pid == 0){
+                        char *args[] = {commands[0], NULL};
+                        execvp(commands[0], args);
+                        perror("execvp");
+                        exit(EXIT_FAILURE);
+                    }
+                    else if (pid > 0){
+                        waitpid(pid, NULL, 0);
+                    }
+                    else{
+                        perror("fork");
+                    }
                 }
             }
             else{

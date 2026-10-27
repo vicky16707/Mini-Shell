@@ -1,7 +1,5 @@
 #include "head.h"
-void scan_input(char *prompt_string, char *input){
-   
-}
+
 void convert_input_to_commands(char *input, char commands[][20]){
     int i = 0;
     char *token = strtok(input, " ");//to find the first token
