@@ -2,6 +2,17 @@
 void scan_input(char *prompt_string, char *input){
    
 }
+void convert_input_to_commands(char *input, char commands[][20]){
+    int i = 0;
+    char *token = strtok(input, " ");//to find the first token
+
+    while (token != NULL ){
+        strcpy(commands[i], token);
+        i++;
+        token = strtok(NULL, " ");
+    }
+    
+}
 void extract_external_commands(char external_commands[][30]){
     FILE *fp;
     char data[100];
