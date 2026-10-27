@@ -28,19 +28,20 @@ int main()
     while (1){
         printf(ANSI_COLOR_GREEN "%s" ANSI_COLOR_RESET "$ ", prompt);
 
-        if (fgets(input_string, sizeof(input_string), stdin) == NULL){
-            break;
-        }
-
-        input_string[strcspn(input_string, "\n")] = '\0';
+        scanf(" %[^\n]", input_string);
 
         if (strncmp(input_string, "PS1=", 4) == 0){
-            if (strchr(input_string + 4, ' ') != NULL ||input_string[4] == '\0'){
-                printf("Invalid prompt string\n");
-                continue;
+
+            int j = 4, i = 0;
+
+            for (i; input_string[i] != '\0'; i++){
+
+                if (input_string[i] == ' '){
+                    printf("Invalid prompt string");
+                }
             }
 
-            strcpy(prompt, input_string + 4);
+            strcpy(prompt, &input_string[j]);
         }
         else{
             char commands[10][20] = {0};
@@ -53,7 +54,7 @@ int main()
                 token = strtok(NULL, " ");
             }
 
-            if (j == 0){
+            if (j == 0){//agin goes to the start of the loop if no command is entered
                 continue;
             }
 
