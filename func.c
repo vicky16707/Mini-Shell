@@ -32,7 +32,7 @@ void extract_external_commands(char external_commands[][30]){
 int check_command_type(char *command, char internal_commands[][10],char external_commands[][30])
 {
     int i;
-    for (i = 0; i < 29; i++){
+    for (i = 0; i < 6; i++){
         if (strcmp(internal_commands[i], command) == 0){
             return BUILTIN;
         }

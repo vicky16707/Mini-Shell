@@ -1,6 +1,6 @@
 
 #include "head.h"
-int status = 0;
+int status =0;
 pid_t pid;
 int main()
 {
@@ -65,7 +65,6 @@ int main()
 
             }
             else if (ret == EXTERNAL){
-                printf("External command\n");
                 pid = fork();
 
                 if (pid == 0){
