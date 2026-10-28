@@ -44,7 +44,7 @@ int main()
                 }
             }
 
-            if (input_string[i] == '\0' && input_string[4] != '\0'){
+            if (input_string[4] != '\0'){
                 strcpy(prompt, input_string + 4);
             }
 
@@ -90,7 +90,7 @@ int main()
                     }
 
                     if (j < 10){
-                        commands[j] = strdup(newcmd);
+                        commands[j] = newcmd;
                         j++;
                         commands[j] = NULL;
                         execute_pipe(commands, j);
@@ -131,3 +131,7 @@ int main()
 
     return 0;
 }
+
+
+
+
