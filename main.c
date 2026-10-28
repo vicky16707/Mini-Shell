@@ -17,8 +17,7 @@ int main()
 
     int i = 0;
 
-    while (builtins[i] != NULL)
-    {
+    while (builtins[i] != NULL){
         strcpy(internal_commands[i], builtins[i]);
         i++;
     }

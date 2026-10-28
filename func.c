@@ -92,9 +92,79 @@ void signal_handler(int sig_num){
     else if (sig_num == SIGTSTP){
         printf("\n");
     }
-    
+
 
 }
+int execute_pipe(char *commands[], int count)
+{
+    int start[count + 1];
+    int pipe_count = 0;
 
+    start[0] = 0;
+
+    for (int i = 0; i < count; i++){
+        if (strcmp(commands[i], "|") == 0){
+            commands[i] = NULL;
+            start[++pipe_count] = i + 1;
+        }
+    }
+
+    if (pipe_count == 0){
+        fprintf(stderr, "No pipe found\n");
+        return 1;
+    }
+
+    int fd[pipe_count][2];
+
+    for (int i = 0; i < pipe_count; i++){
+        if (pipe(fd[i]) == -1)
+        {
+            perror("pipe");
+            return 1;
+        }
+    }
+
+    int n = pipe_count + 1;
+
+    for (int i = 0; i < n; i++){
+        pid_t pid = fork();
+
+        if (pid == -1){
+            perror("fork");
+            return 1;
+        }
+
+        if (pid == 0){
+            if (i > 0){
+                dup2(fd[i - 1][0], STDIN_FILENO);
+            }
+
+            if (i < n - 1){
+                dup2(fd[i][1], STDOUT_FILENO);
+            }
+
+            for (int j = 0; j < pipe_count; j++){
+                close(fd[j][0]);
+                close(fd[j][1]);
+            }
+
+            execvp(commands[start[i]], &commands[start[i]]);
+
+            perror("execvp");
+            exit(1);
+        }
+    }
+
+    for (int i = 0; i < pipe_count; i++){
+        close(fd[i][0]);
+        close(fd[i][1]);
+    }
+
+    for (int i = 0; i < n; i++){
+        wait(NULL);
+    }
+
+    return 0;
+}
 
 
