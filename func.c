@@ -97,7 +97,7 @@ void signal_handler(int sig_num){
 }
 int execute_pipe(char *commands[], int count)
 {
-    int start[count + 1];
+    int start[count + 1];// creating array for the starting index
     int pipe_count = 0;
 
     start[0] = 0;
@@ -105,7 +105,7 @@ int execute_pipe(char *commands[], int count)
     for (int i = 0; i < count; i++){
         if (strcmp(commands[i], "|") == 0){
             commands[i] = NULL;
-            start[++pipe_count] = i + 1;
+            start[++pipe_count] = i + 1;//incrementing the pipe_count and storing the index of the next command after the pipe
         }
     }
 
@@ -114,10 +114,10 @@ int execute_pipe(char *commands[], int count)
         return 1;
     }
 
-    int fd[pipe_count][2];
+    int fd[pipe_count][2];//creating an array of fd for the pipes
 
     for (int i = 0; i < pipe_count; i++){
-        if (pipe(fd[i]) == -1)
+        if (pipe(fd[i]) == -1)//creating pipes
         {
             perror("pipe");
             return 1;
@@ -143,7 +143,7 @@ int execute_pipe(char *commands[], int count)
                 dup2(fd[i][1], STDOUT_FILENO);
             }
 
-            for (int j = 0; j < pipe_count; j++){
+            for (int j = 0; j < pipe_count; j++){//closing the unused fd
                 close(fd[j][0]);
                 close(fd[j][1]);
             }
@@ -155,12 +155,12 @@ int execute_pipe(char *commands[], int count)
         }
     }
 
-    for (int i = 0; i < pipe_count; i++){
+    for (int i = 0; i < pipe_count; i++){//closing the unused fd in the parent process
         close(fd[i][0]);
         close(fd[i][1]);
     }
 
-    for (int i = 0; i < n; i++){
+    for (int i = 0; i < n; i++){//to wait for all child process to finish
         wait(NULL);
     }
 
