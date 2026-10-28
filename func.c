@@ -30,7 +30,7 @@ void extract_external_commands(char external_commands[][30]){
 int check_command_type(char *command, char internal_commands[][10],char external_commands[][30])
 {
     int i;
-    for (i = 0; i < 6; i++){
+    for (i = 0; i < 7; i++){
         if (strcmp(internal_commands[i], command) == 0){
             return BUILTIN;
         }
@@ -74,7 +74,27 @@ void execute_internal_commands(char *input_string){
             perror("getcwd() error");
         }
     }
+    else if(strncmp(input_string, "fg", 2) == 0){
+        // Handle fg command
+    }
+    else if(strncmp(input_string, "bg", 2) == 0){
+        // Handle bg command
+    }
+    else if(strncmp(input_string, "jobs", 4) == 0){
+        // Handle jobs command
+    }
 
 }
+void signal_handler(int sig_num){
+    if (sig_num == SIGINT){
+        printf("\n");
+    }
+    else if (sig_num == SIGTSTP){
+        printf("\n");
+    }
+    
+
+}
+
 
 

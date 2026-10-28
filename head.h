@@ -36,5 +36,6 @@ int check_command_type(char *command, char internal_commands[][10], char externa
 //void signal_handler(int sig_num);
 void extract_external_commands(char external_commands[30][30]);
 void execute_internal_commands(char *input_string);
+int execute_pipe(char *commands[], int count);
 
 #endif
