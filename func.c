@@ -85,8 +85,11 @@ void execute_internal_commands(char *input_string){
     }
 
 }
-void signal_handler(int sig_num){
+void *signal_handler(int sig_num){
     if (sig_num == SIGINT){
+        if(sig_num=0){
+            continue;
+        }
         printf("\n");
     }
     else if (sig_num == SIGTSTP){

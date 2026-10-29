@@ -2,6 +2,18 @@
 int status = 0;
 pid_t pid;
 
+stuct sigaction sa;
+sa.handler=signal_handler;
+sa.flags=0;
+sigemptyset(&sa.sa_mask);
+sigaddset(&sa.mask,SIGINT);
+sigaddset(&sa.maask,SIGTSTP);
+sigaction(SIGINT,&sa,NULL);
+sigaction(SIGTSTP,&sa,NULL);
+
+
+
+
 int main()
 {
     system("clear");
@@ -73,29 +85,20 @@ int main()
             for (int i = 0; i < j; i++){
                 if (strcmp(commands[i], "|") == 0){
                     pipe_present = 1;
-                    break;
+
+                    if (i == 0 || i == j - 1 ) { //if pipe at first or at last loop will not continue
+                        printf("Invalid pipe syntax\n");
+                        pipe_present = -1;
+                        break;
+                    }
                 }
             }
 
-            if (pipe_present){
-                if ((j - 1) % 2 != 0){
-                    execute_pipe(commands, j);
-                }
-                else if ((j - 1) % 2 == 0){
-                    char newcmd[10];
-
-                    printf(">");
-                    if (scanf("%s", newcmd) != 1){
-                        continue;
-                    }
-
-                    if (j < 10){
-                        commands[j] = newcmd;
-                        j++;
-                        commands[j] = NULL;
-                        execute_pipe(commands, j);
-                    }
-                }
+            if (pipe_present == -1){
+                continue;
+            }
+            else if (pipe_present == 1){
+                execute_pipe(commands, j);
             }
             else{
                 int ret = check_command_type(
@@ -111,6 +114,8 @@ int main()
                     pid = fork();
 
                     if (pid == 0){
+                        signal(SIGINT, SIG_DFL);
+                        signal(SIGTSTP, SIG_DFL);
                         execvp(commands[0], commands);
                         perror("execvp");
                         exit(EXIT_FAILURE);
