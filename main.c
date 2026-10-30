@@ -1,7 +1,8 @@
 #include "head.h"
 int status = 0;
-pid_t pid;
+pid_t pid=0;
 char prompt[20];
+
 int main()
 {
     system("clear");
@@ -24,10 +25,11 @@ int main()
 
     strcpy(prompt, "minishell");
     char input_string[50];
+    char input_copy[100];
 
     struct sigaction sa={0};
     sa.sa_handler=signal_handler;
-    sa.sa_flags=0;
+    sa.sa_flags=SA_RESTART;
 
     sigemptyset(&sa.sa_mask);
     sigaddset(&sa.sa_mask,SIGINT);
@@ -41,6 +43,7 @@ int main()
     while (1)
     {
         printf(ANSI_COLOR_MAGENTA "%s" ANSI_COLOR_RESET "$ ", prompt);
+        fflush(stdout);
 
         if (scanf(" %[^\n]", input_string) != 1){
             break;
@@ -48,16 +51,17 @@ int main()
 
         if (strncmp(input_string, "PS1=", 4) == 0){
             int i = 4;
-
+            int valid = 1;
             for (; input_string[i] != '\0'; i++){
                 if (input_string[i] == ' ')
                 {
                     printf("Invalid prompt string\n");
+                    valid=0;
                     break;
                 }
             }
 
-            if (input_string[4] != '\0'){
+            if (valid && input_string[4] != '\0'){
                 strcpy(prompt, input_string + 4);
             }
 
@@ -66,6 +70,7 @@ int main()
         else{
             char *commands[11];
 
+            strcpy(input_copy, input_string);
             char *token = strtok(input_string, " ");
             int j = 0;
 

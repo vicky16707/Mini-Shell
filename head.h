@@ -43,12 +43,9 @@ extern Job *head;
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
 extern int status ;
-//void scan_input(char *prompt, char *input_string);
 char *get_command(char *input_string);
 
-//void copy_change(char *prompt, char *input_string);
 void convert_input_to_commands(char *input, char commands[][20]);
-//void echo(char *input_string, int status);
 int check_command_type(char *command, char internal_commands[][10], char external_commands[][30]);
 void signal_handler(int sig_num);
 void extract_external_commands(char external_commands[30][30]);
@@ -57,7 +54,7 @@ int execute_pipe(char *commands[], int count);
 
 void sigchld_handler(int signum);
 
-void insert_info(void);         // insert at first
+void insert_first(pid_t pid, char *cmd);         // insert at first
 void delete_first(void);
 void print_jobs(void);
 

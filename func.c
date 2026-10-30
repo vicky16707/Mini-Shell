@@ -1,5 +1,5 @@
 #include "head.h"
-
+char cur_input[100] = {0};
 void convert_input_to_commands(char *input, char commands[][20]){
     int i = 0;
     char *token = strtok(input, " ");//to find the first token
@@ -25,7 +25,8 @@ void extract_external_commands(char external_commands[][30]){
             strcpy(external_commands[i],token);
             i++;
         }   
-    }   
+    } 
+    fclose(fp);  
 }
 int check_command_type(char *command, char internal_commands[][10],char external_commands[][30])
 {
@@ -102,16 +103,31 @@ void execute_internal_commands(char *input_string){
     }
 
 }
-void signal_handler(int sig_num){
+void signal_handler(int sig_num){\
+    int save_errno = errno;
     if (sig_num == SIGINT)
     {
        printf("\n%s$ ", prompt);
        return;
     }
-    // else if (sig_num == SIGTSTP)
-    // {
-    //     write(1, "\n", 1);
-    // }
+    else if (sig_num == SIGTSTP)
+    {
+        if(pid==0){
+            printf("\n%s$ ", prompt);
+            return;
+        }
+        else{
+
+            insert_first(pid, cur_input);
+            
+        }      
+    }
+    else if(sig_num == SIGCHLD){
+        if (pid == 0)
+        {
+            while (waitpid(-1, NULL, WNOHANG) > 0);
+        }
+    }
     
 }
 int execute_pipe(char *commands[], int count)
