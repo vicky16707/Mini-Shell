@@ -85,18 +85,16 @@ void execute_internal_commands(char *input_string){
     }
 
 }
-void *signal_handler(int sig_num){
-    if (sig_num == SIGINT){
-        if(sig_num=0){
-            continue;
-        }
-        printf("\n");
+void signal_handler(int sig_num){
+    if (sig_num == SIGINT)
+    {
+       if(pid==0)
     }
-    else if (sig_num == SIGTSTP){
-        printf("\n");
+    else if (sig_num == SIGTSTP)
+    {
+        write(1, "\n", 1);
     }
-
-
+    
 }
 int execute_pipe(char *commands[], int count)
 {

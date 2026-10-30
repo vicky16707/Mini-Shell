@@ -2,14 +2,7 @@
 int status = 0;
 pid_t pid;
 
-stuct sigaction sa;
-sa.handler=signal_handler;
-sa.flags=0;
-sigemptyset(&sa.sa_mask);
-sigaddset(&sa.mask,SIGINT);
-sigaddset(&sa.maask,SIGTSTP);
-sigaction(SIGINT,&sa,NULL);
-sigaction(SIGTSTP,&sa,NULL);
+
 
 
 
@@ -37,9 +30,21 @@ int main()
     char prompt[20] = "minishell";
     char input_string[50];
 
+    struct sigaction sa={0};
+    sa.sa_handler=signal_handler;
+    sa.sa_flags=0;
+
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask,SIGINT);
+    sigaddset(&sa.sa_mask,SIGTSTP);
+
+    sigaction(SIGINT,&sa,NULL);
+    sigaction(SIGTSTP,&sa,NULL);
+
+
     while (1)
     {
-        printf(ANSI_COLOR_GREEN "%s" ANSI_COLOR_RESET "$ ", prompt);
+        printf(ANSI_COLOR_MAGENTA "%s" ANSI_COLOR_RESET "$ ", prompt);
 
         if (scanf(" %[^\n]", input_string) != 1){
             break;
@@ -113,28 +118,32 @@ int main()
                 else if (ret == EXTERNAL){
                     pid = fork();
 
-                    if (pid == 0){
+                    if (pid < 0){
+                        perror("fork");
+                    }
+                    else if (pid == 0){
                         signal(SIGINT, SIG_DFL);
                         signal(SIGTSTP, SIG_DFL);
+
                         execvp(commands[0], commands);
                         perror("execvp");
                         exit(EXIT_FAILURE);
                     }
-                    else if (pid > 0){
+                    else
+                    {
                         waitpid(pid, NULL, 0);
                     }
-                    else{
-                        perror("fork");
-                    }
                 }
-                else{
+                else
+                {
                     printf("No Command\n");
                 }
+                
             }
         }
     }
 
-    return 0;
+     return 0;
 }
 
 
