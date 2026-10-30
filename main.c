@@ -1,3 +1,24 @@
+/****************************************************************************************************
+ * Project Title : Mini Shell
+
+ * Description :
+   A command-line shell developed in C that provides an interface to execute builtin and external
+   commands. The project uses Linux system calls to create and manage processes and supports
+   command execution, piping, signal handling and job control.
+
+ * Features :
+   - Executes builtin commands such as echo, cd, pwd, exit, fg, bg and jobs.
+   - Executes external commands using fork() and execvp().
+   - Supports multiple commands connected using pipes.
+   - Handles signals such as SIGINT, SIGTSTP and SIGCHLD.
+   - Maintains a job list to manage stopped processes.
+   - Supports foreground and background job execution.
+   - Implements process creation, process synchronization and inter-process communication.
+   - Uses system calls, signals, pipes and linked lists.
+
+ * Author : Vignesh N
+ * Roll no : 26010_020
+ ****************************************************************************************************/
 #include "head.h"
 int status = 0;
 pid_t pid=0;
@@ -10,7 +31,7 @@ int main()
     char external_commands[160][30] = {0};
     char internal_commands[9][10] = {0};
 
-    extract_external_commands(external_commands);
+    extract_external_commands(external_commands);//getting external commands from the file
 
     char *builtins[] = {
         "echo", "cd", "pwd", "exit", "fg", "bg", "jobs", NULL
@@ -19,11 +40,11 @@ int main()
     int i = 0;
 
     while (builtins[i] != NULL){
-        strcpy(internal_commands[i], builtins[i]);
+        strcpy(internal_commands[i], builtins[i]);//copying the builtins to the internal_commands array
         i++;
     }
 
-    strcpy(prompt, "minishell");
+    strcpy(prompt, "minishell");//inintial prompt
 
     char input_string[50];
     char input_copy[100];
@@ -36,9 +57,9 @@ int main()
     sigaddset(&sa.sa_mask,SIGINT);
     sigaddset(&sa.sa_mask,SIGTSTP);
 
-    signal(SIGINT,SIG_IGN);
-    signal(SIGTSTP,SIG_IGN);
-    sigaction(SIGCHLD,&sa,NULL);
+    signal(SIGINT,SIG_IGN);//ignoring ctrl+c in the shell
+    signal(SIGTSTP,SIG_IGN);//ignoring ctrl+z in the shell
+    sigaction(SIGCHLD,&sa,NULL);//handling the child termination signal
 
 
     while (1)
@@ -63,7 +84,7 @@ int main()
             }
 
             if (valid && input_string[4] != '\0'){
-                strcpy(prompt, input_string + 4);
+                strcpy(prompt, input_string + 4);//updating the prompt
             }
 
             continue;
@@ -71,18 +92,18 @@ int main()
         else{
             char *commands[11];
 
-            strcpy(input_copy, input_string);
+            strcpy(input_copy, input_string);//keeping a copy of the original input
 
             char *token = strtok(input_string, " ");
             int j = 0;
 
             while (token != NULL && j < 10){
-                commands[j] = token;
+                commands[j] = token;//storing each command argument
                 j++;
                 token = strtok(NULL, " ");
             }
 
-            commands[j] = NULL;
+            commands[j] = NULL;//marking the end of the arguments
 
             if (j == 0){//agin goes to the start of the loop if no command is entered
                 continue;
@@ -106,18 +127,18 @@ int main()
                 continue;
             }
             else if (pipe_present == 1){
-                execute_pipe(commands, j);
+                execute_pipe(commands, j);//executing commands with pipe
             }
             else{
                 int ret = check_command_type(commands[0],internal_commands,external_commands);
 
                 if (ret == BUILTIN){
-                    execute_internal_commands(input_copy);
+                    execute_internal_commands(input_copy);//executing builtin commands
                 }
                 else if (ret == EXTERNAL){
                     strcpy(cur_input, input_copy);
 
-                    pid = fork();
+                    pid = fork(); //creating a child process
 
                     if (pid < 0){
                         perror("fork");
@@ -125,7 +146,7 @@ int main()
                     }
                     else if (pid == 0){
                         
-                        signal(SIGINT, SIG_DFL);
+                        signal(SIGINT, SIG_DFL);  //restoring default signal handling in child
                         signal(SIGTSTP, SIG_DFL);
                         signal(SIGCHLD, SIG_DFL);
 
@@ -136,10 +157,10 @@ int main()
                     else
                     {
                         
-                        waitpid(pid, &status, WUNTRACED);
+                        waitpid(pid, &status, WUNTRACED);//waiting for child or detecting if it is stopped
 
                         if(WIFSTOPPED(status)){
-                            insert_first(pid, cur_input);
+                            insert_first(pid, cur_input); //adding stopped job to the list
                         }
                         pid=0;
                     }

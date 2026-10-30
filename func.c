@@ -5,7 +5,7 @@ void convert_input_to_commands(char *input, char commands[][20]){
     char *token = strtok(input, " ");//to find the first token
 
     while (token != NULL ){
-        strcpy(commands[i], token);
+        strcpy(commands[i], token);//copying each comd in the array
         i++;
         token = strtok(NULL, " ");
     }
@@ -15,7 +15,7 @@ void extract_external_commands(char external_commands[][30]){
     FILE *fp;
     char data[100];
     int i=0;
-    fp=fopen("external.txt","r");
+    fp=fopen("external.txt","r");//open txt file
     if(fp==NULL){
         return ;
     }
@@ -47,17 +47,17 @@ int check_command_type(char *command, char internal_commands[][10],char external
 
 void execute_internal_commands(char *input_string){
     if(strncmp(input_string, "cd", 2) == 0){
-        chdir(&input_string[3]);
+        chdir(&input_string[3]);//changing directory to the given path
     }
     else if(strncmp(input_string, "exit", 4) == 0){
         exit(0);
     }
     else if(strncmp(input_string, "echo", 4) == 0){
         if(strncmp(input_string, "echo $SHELL", 11) == 0){
-            printf("%s\n", getenv("SHELL"));
+            printf("%s\n", getenv("SHELL"));//print shell path
         }
         else if(strncmp(input_string, "echo $$", 7) == 0){
-            printf("%d\n", getpid());
+            printf("%d\n", getpid());//printing pid
         }
         else if(strncmp(input_string, "echo $?", 7) == 0){
             printf("%d\n", WEXITSTATUS(status));
@@ -82,12 +82,12 @@ void execute_internal_commands(char *input_string){
             return;
         }
         pid_t job_pid = head->pid;
-        strcpy(cur_input, head->cmd);
-        delete_first();
-        kill(job_pid, SIGCONT);
-        waitpid(job_pid, &status, WUNTRACED);
+        strcpy(cur_input, head->cmd); //saving the command before deleting the node
+        delete_first();                //removing the job from the list
+        kill(job_pid, SIGCONT);          //resuming the stopped process
+        waitpid(job_pid, &status, WUNTRACED);  //waiting for the process
         if(WIFSTOPPED(status)){
-            insert_first(job_pid, cur_input);
+            insert_first(job_pid, cur_input); //adding it back if it stops again
         }
         pid=0;
     }
@@ -97,7 +97,7 @@ void execute_internal_commands(char *input_string){
             printf("No jobs to resume in background.\n");
             return;
         }
-        kill(head->pid, SIGCONT);
+        kill(head->pid, SIGCONT);//resuming the job in the background
         delete_first();
     }
     else if(strncmp(input_string, "jobs", 4) == 0){
@@ -107,7 +107,7 @@ void execute_internal_commands(char *input_string){
 
 }
 void signal_handler(int sig_num){
-    int save_errno = errno;
+    int save_errno = errno;//saving the errno value to restore it later
 
     if (sig_num == SIGINT)
     {
@@ -127,10 +127,10 @@ void signal_handler(int sig_num){
     else if(sig_num == SIGCHLD){
         if (pid == 0)
         {
-            while (waitpid(-1, NULL, WNOHANG) > 0);
+            while (waitpid(-1, NULL, WNOHANG) > 0);//collecting completed child processes
         }
     }
-    errno=save_errno;
+    errno=save_errno;//restorign the errno
     
 }
 int execute_pipe(char *commands[], int count)
