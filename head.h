@@ -18,12 +18,21 @@
 #define NO_COMMAND  3
 
 
-
+extern char prompt[20] ;
 typedef struct job {
     pid_t pid;
     char cmd[100];
     struct job *next;
 } Job;
+
+extern int status;
+extern pid_t pid;               // 0 = no child running
+
+extern char prompt[20];
+extern char cur_input[100];     // command text of the running child
+
+extern Job *head;
+
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -45,5 +54,11 @@ void signal_handler(int sig_num);
 void extract_external_commands(char external_commands[30][30]);
 void execute_internal_commands(char *input_string);
 int execute_pipe(char *commands[], int count);
+
+void sigchld_handler(int signum);
+
+void insert_info(void);         // insert at first
+void delete_first(void);
+void print_jobs(void);
 
 #endif

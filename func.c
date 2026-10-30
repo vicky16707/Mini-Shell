@@ -76,24 +76,42 @@ void execute_internal_commands(char *input_string){
     }
     else if(strncmp(input_string, "fg", 2) == 0){
         // Handle fg command
+        if(!head) {
+            printf("No jobs to bring to foreground.\n");
+            return;
+        }
+        pid_t job_pid = head->pid;
+        strcpy(cur_input, head->cmd);
+        delete_first();
+        kill(job_pid, SIGCONT);
+        waitpid(job_pid, &status, WUNTRACED);
+        pid=0;
     }
     else if(strncmp(input_string, "bg", 2) == 0){
         // Handle bg command
+        if(!head) {
+            printf("No jobs to resume in background.\n");
+            return;
+        }
+        kill(head->pid, SIGCONT);
+        delete_first();
     }
     else if(strncmp(input_string, "jobs", 4) == 0){
         // Handle jobs command
+        print_jobs();
     }
 
 }
 void signal_handler(int sig_num){
     if (sig_num == SIGINT)
     {
-       if(pid==0)
+       printf("\n%s$ ", prompt);
+       return;
     }
-    else if (sig_num == SIGTSTP)
-    {
-        write(1, "\n", 1);
-    }
+    // else if (sig_num == SIGTSTP)
+    // {
+    //     write(1, "\n", 1);
+    // }
     
 }
 int execute_pipe(char *commands[], int count)

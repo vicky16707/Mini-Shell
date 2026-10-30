@@ -1,12 +1,7 @@
 #include "head.h"
 int status = 0;
 pid_t pid;
-
-
-
-
-
-
+char prompt[20];
 int main()
 {
     system("clear");
@@ -27,7 +22,7 @@ int main()
         i++;
     }
 
-    char prompt[20] = "minishell";
+    strcpy(prompt, "minishell");
     char input_string[50];
 
     struct sigaction sa={0};
@@ -40,6 +35,7 @@ int main()
 
     sigaction(SIGINT,&sa,NULL);
     sigaction(SIGTSTP,&sa,NULL);
+    sigaction(SIGCHLD,&sa,NULL);
 
 
     while (1)
@@ -124,10 +120,11 @@ int main()
                     else if (pid == 0){
                         signal(SIGINT, SIG_DFL);
                         signal(SIGTSTP, SIG_DFL);
+                        signal(SIGCHLD, SIG_DFL);
 
                         execvp(commands[0], commands);
                         perror("execvp");
-                        exit(EXIT_FAILURE);
+                        exit(0);
                     }
                     else
                     {
