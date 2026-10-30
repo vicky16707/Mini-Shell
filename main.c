@@ -24,6 +24,7 @@ int main()
     }
 
     strcpy(prompt, "minishell");
+
     char input_string[50];
     char input_copy[100];
 
@@ -35,8 +36,8 @@ int main()
     sigaddset(&sa.sa_mask,SIGINT);
     sigaddset(&sa.sa_mask,SIGTSTP);
 
-    sigaction(SIGINT,&sa,NULL);
-    sigaction(SIGTSTP,&sa,NULL);
+    signal(SIGINT,SIG_IGN);
+    signal(SIGTSTP,SIG_IGN);
     sigaction(SIGCHLD,&sa,NULL);
 
 
@@ -71,6 +72,7 @@ int main()
             char *commands[11];
 
             strcpy(input_copy, input_string);
+
             char *token = strtok(input_string, " ");
             int j = 0;
 
@@ -107,33 +109,39 @@ int main()
                 execute_pipe(commands, j);
             }
             else{
-                int ret = check_command_type(
-                    commands[0],
-                    internal_commands,
-                    external_commands
-                );
+                int ret = check_command_type(commands[0],internal_commands,external_commands);
 
                 if (ret == BUILTIN){
-                    execute_internal_commands(input_string);
+                    execute_internal_commands(input_copy);
                 }
                 else if (ret == EXTERNAL){
+                    strcpy(cur_input, input_copy);
+
                     pid = fork();
 
                     if (pid < 0){
                         perror("fork");
+                        pid=0;
                     }
                     else if (pid == 0){
+                        
                         signal(SIGINT, SIG_DFL);
                         signal(SIGTSTP, SIG_DFL);
                         signal(SIGCHLD, SIG_DFL);
 
                         execvp(commands[0], commands);
                         perror("execvp");
-                        exit(0);
+                        exit(1);
                     }
                     else
                     {
-                        waitpid(pid, NULL, 0);
+                        
+                        waitpid(pid, &status, WUNTRACED);
+
+                        if(WIFSTOPPED(status)){
+                            insert_first(pid, cur_input);
+                        }
+                        pid=0;
                     }
                 }
                 else

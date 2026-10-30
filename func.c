@@ -86,6 +86,9 @@ void execute_internal_commands(char *input_string){
         delete_first();
         kill(job_pid, SIGCONT);
         waitpid(job_pid, &status, WUNTRACED);
+        if(WIFSTOPPED(status)){
+            insert_first(job_pid, cur_input);
+        }
         pid=0;
     }
     else if(strncmp(input_string, "bg", 2) == 0){
@@ -103,24 +106,23 @@ void execute_internal_commands(char *input_string){
     }
 
 }
-void signal_handler(int sig_num){\
+void signal_handler(int sig_num){
     int save_errno = errno;
+
     if (sig_num == SIGINT)
     {
-       printf("\n%s$ ", prompt);
-       return;
+        if(pid==0){
+        printf("\n%s$ ", prompt);
+        fflush(stdout);
+        }
     }
     else if (sig_num == SIGTSTP)
     {
         if(pid==0){
             printf("\n%s$ ", prompt);
-            return;
+            fflush(stdout);
         }
-        else{
-
-            insert_first(pid, cur_input);
-            
-        }      
+     
     }
     else if(sig_num == SIGCHLD){
         if (pid == 0)
@@ -128,6 +130,7 @@ void signal_handler(int sig_num){\
             while (waitpid(-1, NULL, WNOHANG) > 0);
         }
     }
+    errno=save_errno;
     
 }
 int execute_pipe(char *commands[], int count)

@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <errno.h>
  
 
 #define BUILTIN		1
@@ -48,7 +49,7 @@ char *get_command(char *input_string);
 void convert_input_to_commands(char *input, char commands[][20]);
 int check_command_type(char *command, char internal_commands[][10], char external_commands[][30]);
 void signal_handler(int sig_num);
-void extract_external_commands(char external_commands[30][30]);
+void extract_external_commands(char external_commands[][30]);
 void execute_internal_commands(char *input_string);
 int execute_pipe(char *commands[], int count);
 
