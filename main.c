@@ -23,6 +23,7 @@
 int status = 0;
 pid_t pid=0;
 char prompt[20];
+int child_changed = 0;
 
 int main()
 {
@@ -57,14 +58,14 @@ int main()
     sigaddset(&sa.sa_mask,SIGINT);
     sigaddset(&sa.sa_mask,SIGTSTP);
 
-    signal(SIGINT,SIG_IGN);//ignoring ctrl+c in the shell
-    signal(SIGTSTP,SIG_IGN);//ignoring ctrl+z in the shell
+    sigaction(SIGINT,&sa,NULL);//ignoring ctrl+c in the shell
+    sigaction(SIGTSTP,&sa,NULL);//ignoring ctrl+z in the shell
     sigaction(SIGCHLD,&sa,NULL);//handling the child termination signal
 
 
     while (1)
     {
-        printf(ANSI_COLOR_MAGENTA "%s" ANSI_COLOR_RESET "$ ", prompt);
+        printf("%s$ ", prompt);
         fflush(stdout);
 
         if (scanf(" %[^\n]", input_string) != 1){
@@ -108,7 +109,16 @@ int main()
             if (j == 0){//agin goes to the start of the loop if no command is entered
                 continue;
             }
+            int background = 0;
 
+            if(strcmp(commands[j - 1], "&") == 0){
+                background = 1;
+                commands[--j] = NULL;
+            }
+
+            if(j == 0){
+                continue;
+            }
             int pipe_present = 0;
 
             for (int i = 0; i < j; i++){
@@ -156,11 +166,15 @@ int main()
                     }
                     else
                     {
-                        
-                        waitpid(pid, &status, WUNTRACED);//waiting for child or detecting if it is stopped
-
-                        if(WIFSTOPPED(status)){
-                            insert_first(pid, cur_input); //adding stopped job to the list
+                        if(background==0){
+                            waitpid(pid, &status, WUNTRACED);//waiting for child or detecting if it is stopped
+                            if(WIFSTOPPED(status)){
+                                insert_first(pid, cur_input,STOPPED); //adding stopped job to the list
+                            }
+                        }
+                        else{
+                            printf("[%d] %s\n", pid, cur_input);
+                            insert_first(pid, cur_input,RUNNING); //adding stopped job to the list
                         }
                         pid=0;
                     }

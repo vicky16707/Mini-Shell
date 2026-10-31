@@ -57,7 +57,10 @@ void execute_internal_commands(char *input_string){
             printf("%s\n", getenv("SHELL"));//print shell path
         }
         else if(strncmp(input_string, "echo $$", 7) == 0){
-            printf("%d\n", getpid());//printing pid
+            if(WIFEXITED(status))
+                printf("%d\n", WEXITSTATUS(status));
+            else
+                printf("%d\n", status);
         }
         else if(strncmp(input_string, "echo $?", 7) == 0){
             printf("%d\n", WEXITSTATUS(status));
@@ -83,11 +86,14 @@ void execute_internal_commands(char *input_string){
         }
         pid_t job_pid = head->pid;
         strcpy(cur_input, head->cmd); //saving the command before deleting the node
-        delete_first();                //removing the job from the list
+        delete_job(job_pid); 
+                       //removing the job from the list
+        pid = job_pid; //setting the global pid to the job's pid
         kill(job_pid, SIGCONT);          //resuming the stopped process
         waitpid(job_pid, &status, WUNTRACED);  //waiting for the process
+        
         if(WIFSTOPPED(status)){
-            insert_first(job_pid, cur_input); //adding it back if it stops again
+            insert_first(job_pid, cur_input, STOPPED); //adding it back if it stops again
         }
         pid=0;
     }
@@ -97,8 +103,9 @@ void execute_internal_commands(char *input_string){
             printf("No jobs to resume in background.\n");
             return;
         }
-        kill(head->pid, SIGCONT);//resuming the job in the background
-        delete_first();
+        if(kill(head->pid, SIGCONT) == 0){//resuming the job in the background
+            head->state = RUNNING;
+        }
     }
     else if(strncmp(input_string, "jobs", 4) == 0){
         // Handle jobs command
@@ -112,8 +119,8 @@ void signal_handler(int sig_num){
     if (sig_num == SIGINT)
     {
         if(pid==0){
-        printf("\n%s$ ", prompt);
-        fflush(stdout);
+            printf("\n%s$ ", prompt);
+            fflush(stdout);
         }
     }
     else if (sig_num == SIGTSTP)
@@ -125,10 +132,7 @@ void signal_handler(int sig_num){
      
     }
     else if(sig_num == SIGCHLD){
-        if (pid == 0)
-        {
-            while (waitpid(-1, NULL, WNOHANG) > 0);//collecting completed child processes
-        }
+        child_changed = 1; //indicating that a child process has changed state
     }
     errno=save_errno;//restorign the errno
     

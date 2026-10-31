@@ -18,11 +18,16 @@
 #define EXTERNAL	2
 #define NO_COMMAND  3
 
+#define RUNNING 1
+#define STOPPED 2
+
+
 
 extern char prompt[20] ;
 typedef struct job {
     pid_t pid;
     char cmd[100];
+    int state; // 0 = running, 1 = stopped
     struct job *next;
 } Job;
 
@@ -31,7 +36,7 @@ extern pid_t pid;               // 0 = no child running
 
 extern char prompt[20];
 extern char cur_input[100];     // command text of the running child
-
+extern int child_changed;
 extern Job *head;
 
 
@@ -55,8 +60,9 @@ int execute_pipe(char *commands[], int count);
 
 void sigchld_handler(int signum);
 
-void insert_first(pid_t pid, char *cmd);         // insert at first
+void insert_first(pid_t pid, char *cmd,int state);         // insert at first
 void delete_first(void);
+void delete_job(pid_t pid);
 void print_jobs(void);
 
 #endif
